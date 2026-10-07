@@ -1366,3 +1366,38 @@ ul,ol{list-style:none}
     transition-duration:.01ms !important;
   }
 }
+
+/* ============================================================
+   分享卡图片预览
+   ============================================================ */
+.share-preview{
+  min-height:220px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:14px;
+  padding:4px;
+}
+.share-preview .share-image{
+  width:100%;
+  height:auto;
+  border-radius:14px;
+  box-shadow:0 8px 30px rgba(23,23,23,.14);
+  display:block;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-touch-callout:default;
+}
+.share-loading{
+  display:flex;align-items:center;justify-content:center;
+  gap:10px;
+  color:#A8A29E;
+  font-size:13px;
+  padding:60px 20px;
+}
+.spinner{
+  width:16px;height:16px;
+  border:2px solid #ECE7E0;
+  border-top-color:#B89562;
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}

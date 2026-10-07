@@ -97,20 +97,16 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="js/data.js?v=3"></script>
-<script src="js/scoring.js?v=3"></script>
-<script src="js/app.js?v=3"></script>
-<script src="js/result.js?v=3"></script>
+<script src="js/data.js?v=5"></script>
+<script src="js/scoring.js?v=5"></script>
+<script src="js/app.js?v=5"></script>
 
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-  }
-}
-</script>
-<script type="module" src="js/three-character.js?v=3"></script>
+<!-- Three.js r128 传统版，非 module，兼容性最好 -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js" defer></script>
+
+<script src="js/result.js?v=5"></script>
+<script src="js/three-character.js?v=5" defer></script>
 <script>window.__BOOT__ && window.__BOOT__();</script>
 
 </body>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#F8F6F2">
+<title>AI STYLE LAB｜穿搭人格测试</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ============ 首页 ============ -->
+  <section class="home" id="home">
+    <div class="home-brand">
+      <span class="brand-line"></span>
+      <span class="brand-text">AI STYLE LAB</span>
+    </div>
+
+    <h1 class="home-title">
+      你今天穿什么，<br>
+      其实早就<em>暴露了你的性格</em>。
+    </h1>
+
+    <p class="home-sub">20 道问题 · 发现你的穿搭人格</p>
+
+    <div class="home-visual" aria-hidden="true">
+      <div class="gift-box">
+        <div class="gift-lid">
+          <span class="gift-ribbon"></span>
+        </div>
+        <div class="gift-body">
+          <span class="gift-ribbon-v"></span>
+        </div>
+      </div>
+      <div class="gift-shadow"></div>
+    </div>
+
+    <button class="btn-primary" id="startBtn">开始测试</button>
+    <p class="home-note">约 2 分钟 · 免费 · 娱乐性测试</p>
+
+    <div class="home-collection" id="homeCollection" style="display:none">
+      <span class="collection-label">已收集人格</span>
+      <span class="collection-count" id="collectionCount">0 / 10</span>
+    </div>
+  </section>
+
+  <!-- ============ 测试页 ============ -->
+  <section class="quiz" id="quiz" style="display:none">
+    <div class="quiz-head">
+      <button class="quiz-back" id="backBtn" aria-label="上一题">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="quiz-label">
+        <span class="quiz-label-main">YOUR STYLE DNA</span>
+        <span class="quiz-label-num" id="quizNum">01 / 21</span>
+      </div>
+      <div class="quiz-spacer"></div>
+    </div>
+
+    <div class="ruler" id="ruler">
+      <div class="ruler-track">
+        <div class="ruler-fill" id="rulerFill"></div>
+        <div class="ruler-knob" id="rulerKnob"></div>
+      </div>
+    </div>
+
+    <div class="quiz-body" id="quizBody"></div>
+
+    <div class="quiz-foot">
+      <button class="btn-primary" id="nextBtn" disabled>下一题</button>
+    </div>
+  </section>
+
+  <!-- ============ 盲盒 ============ -->
+  <section class="blind" id="blind" style="display:none">
+    <div class="blind-stage" id="blindStage"></div>
+  </section>
+
+  <!-- ============ 结果页 ============ -->
+  <section class="result" id="result" style="display:none">
+    <div id="resultMain"></div>
+  </section>
+
+</div>
+
+<!-- 人格图鉴弹层 -->
+<div class="modal" id="collectionModal">
+  <div class="modal-bg" data-close></div>
+  <div class="modal-panel">
+    <div class="modal-head">
+      <h3>穿搭人格图鉴</h3>
+      <button class="modal-close" data-close>&times;</button>
+    </div>
+    <p class="modal-sub" id="collectionSub">已收集 0 / 10</p>
+    <div class="collection-grid" id="collectionGrid"></div>
+  </div>
+</div>
+
+<!-- 分享卡弹层 -->
+<div class="modal" id="shareModal">
+  <div class="modal-bg" data-close></div>
+  <div class="modal-panel modal-panel-card">
+    <div class="modal-head">
+      <h3>分享卡</h3>
+      <button class="modal-close" data-close>&times;</button>
+    </div>
+    <div id="shareCardWrap"></div>
+    <p class="share-hint">长按卡片保存 · 或点击下方按钮分享</p>
+    <div class="share-actions">
+      <button class="btn-ghost" id="shareTextBtn">复制结果文字</button>
+      <button class="btn-primary" id="shareNativeBtn" style="display:none">分享给朋友</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- 脚本 -->
+<script src="js/data.js"></script>
+<script src="js/scoring.js"></script>
+<script src="js/app.js"></script>
+<script src="js/result.js"></script>
+<script>window.__BOOT__ && window.__BOOT__();</script>
+
+</body>
+</html>

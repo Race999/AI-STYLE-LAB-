@@ -285,33 +285,100 @@
   /* ============================================================
      商品卡
      ============================================================ */
-  function renderProduct(p, i){
-    const phText = (p.name || "单品").slice(0, 2);
-    const reasons = (p._reasons || []).map(x => `<div class="product-reason">${esc(x)}</div>`).join("");
+function renderProduct(p, i){
+  const reasons = (p._reasons || []).map(x => `<div class="product-reason">${esc(x)}</div>`).join("");
 
-    const media = p.image
-      ? `<img src="${esc(p.image)}" alt="${esc(p.name)}" onerror="this.style.display='none';this.parentNode.querySelector('.ph').style.display='block'">
-         <div class="ph" style="display:none">${esc(phText)}</div>`
-      : `<div class="ph">${esc(phText)}</div>`;
+  // SVG 图标：根据商品名/风格判断
+  const icon = pickProductIcon(p);
 
+  const media = p.image
+    ? `<img src="${esc(p.image)}" alt="${esc(p.name)}" onerror="this.style.display='none';this.parentNode.querySelector('.ph-svg').style.display='flex'">
+       <div class="ph-svg" style="display:none">${icon}</div>`
+    : `<div class="ph-svg">${icon}</div>`;
+
+  return `
+    <div class="product">
+      <div class="product-media">
+        ${media}
+        <span class="product-index">0${i + 1}</span>
+        <span class="product-match">匹配 ${p._match || 85}%</span>
+      </div>
+      <div class="product-body">
+        <div class="product-name">${esc(p.name)}</div>
+        <div class="product-reasons">${reasons}</div>
+        <div class="product-foot">
+          <div class="product-price"><small>¥</small>${p.price}</div>
+          <button class="product-buy" data-url="${esc(p.url || "#")}" data-id="${esc(p.id)}">查看商品</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* 根据商品信息挑选对应的线条图标 */
+function pickProductIcon(p){
+  const name = (p.name || "").toLowerCase();
+  const styles = (p.styles || []).join(" ");
+
+  // 裙子
+  if(name.includes("裙") || name.includes("dress")){
     return `
-      <div class="product">
-        <div class="product-media">
-          ${media}
-          <span class="product-index">0${i + 1}</span>
-          <span class="product-match">匹配 ${p._match || 85}%</span>
-        </div>
-        <div class="product-body">
-          <div class="product-name">${esc(p.name)}</div>
-          <div class="product-reasons">${reasons}</div>
-          <div class="product-foot">
-            <div class="product-price"><small>¥</small>${p.price}</div>
-            <button class="product-buy" data-url="${esc(p.url || "#")}" data-id="${esc(p.id)}">查看商品</button>
-          </div>
-        </div>
+      <div class="ph-icon">
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M26 12 L22 22 L18 52 Q18 54 20 54 L44 54 Q46 54 46 52 L42 22 L38 12 Z"/>
+          <path d="M26 12 Q32 18 38 12"/>
+          <path d="M22 22 L42 22"/>
+        </svg>
       </div>
     `;
   }
+  // 外套/风衣/西装
+  if(name.includes("外套") || name.includes("风衣") || name.includes("西装") || name.includes("夹克") || name.includes("coat") || name.includes("jacket")){
+    return `
+      <div class="ph-icon">
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 14 L32 20 L42 14 L48 18 L48 52 L16 52 L16 18 Z"/>
+          <path d="M32 20 L32 52"/>
+          <path d="M24 14 L22 24"/>
+          <path d="M40 14 L42 24"/>
+        </svg>
+      </div>
+    `;
+  }
+  // 裤子
+  if(name.includes("裤") || name.includes("pants") || name.includes("jeans")){
+    return `
+      <div class="ph-icon">
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 12 L20 20 L22 52 L30 52 L32 30 L34 52 L42 52 L44 20 L44 12 Z"/>
+          <path d="M20 20 L44 20"/>
+        </svg>
+      </div>
+    `;
+  }
+  // 针织/开衫/衬衫/上衣
+  if(name.includes("针织") || name.includes("开衫") || name.includes("衬衫") || name.includes("上衣") || name.includes("hoodie") || name.includes("shirt") || name.includes("卫衣")){
+    return `
+      <div class="ph-icon">
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M24 14 L18 18 L18 30 L22 30 L22 52 L42 52 L42 30 L46 30 L46 18 L40 14 L32 20 Z"/>
+          <path d="M24 14 Q32 20 40 14"/>
+          <path d="M32 20 L32 52"/>
+        </svg>
+      </div>
+    `;
+  }
+  // 兜底：衣架
+  return `
+    <div class="ph-icon">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M32 12 Q32 8 35 8 Q38 8 38 11 Q38 14 35 15 L35 20"/>
+        <path d="M35 20 L16 34 L48 34 L35 20"/>
+        <path d="M16 34 L16 50 Q16 52 18 52 L46 52 Q48 52 48 50 L48 34"/>
+      </svg>
+    </div>
+  `;
+}
 
   /* ============================================================
      事件绑定

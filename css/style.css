@@ -1401,6 +1401,7 @@ ul,ol{list-style:none}
   animation:spin .8s linear infinite;
 }
 @keyframes spin{to{transform:rotate(360deg)}}
+
 /* ============================================================
    全屏看图（微信/iOS 长按保存）
    ============================================================ */
@@ -1452,4 +1453,22 @@ ul,ol{list-style:none}
   background:rgba(255,255,255,.08);
   backdrop-filter:blur(6px);
   border:0;
+}
+
+/* ============================================================
+   商品占位图（极简线条图标）
+   ============================================================ */
+.ph-svg{
+  width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#F7F3ED 0%,#EDE6DA 100%);
+  color:#B7AC9C;
+}
+.ph-svg .ph-icon{
+  width:72px;height:72px;
+  opacity:.72;
+}
+.ph-svg .ph-icon svg{
+  width:100%;height:100%;
+  display:block;
 }

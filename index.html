@@ -10,43 +10,31 @@
 <body>
 
 <div class="app">
-
-  <!-- ============ 首页 ============ -->
   <section class="home" id="home">
     <div class="home-brand">
       <span class="brand-line"></span>
       <span class="brand-text">AI STYLE LAB</span>
     </div>
-
     <h1 class="home-title">
       你今天穿什么，<br>
       其实早就<em>暴露了你的性格</em>。
     </h1>
-
     <p class="home-sub">20 道问题 · 发现你的穿搭人格</p>
-
     <div class="home-visual" aria-hidden="true">
       <div class="gift-box">
-        <div class="gift-lid">
-          <span class="gift-ribbon"></span>
-        </div>
-        <div class="gift-body">
-          <span class="gift-ribbon-v"></span>
-        </div>
+        <div class="gift-lid"><span class="gift-ribbon"></span></div>
+        <div class="gift-body"><span class="gift-ribbon-v"></span></div>
       </div>
       <div class="gift-shadow"></div>
     </div>
-
     <button class="btn-primary" id="startBtn">开始测试</button>
     <p class="home-note">约 2 分钟 · 免费 · 娱乐性测试</p>
-
     <div class="home-collection" id="homeCollection" style="display:none">
       <span class="collection-label">已收集人格</span>
       <span class="collection-count" id="collectionCount">0 / 10</span>
     </div>
   </section>
 
-  <!-- ============ 测试页 ============ -->
   <section class="quiz" id="quiz" style="display:none">
     <div class="quiz-head">
       <button class="quiz-back" id="backBtn" aria-label="上一题">
@@ -58,34 +46,27 @@
       </div>
       <div class="quiz-spacer"></div>
     </div>
-
     <div class="ruler" id="ruler">
       <div class="ruler-track">
         <div class="ruler-fill" id="rulerFill"></div>
         <div class="ruler-knob" id="rulerKnob"></div>
       </div>
     </div>
-
     <div class="quiz-body" id="quizBody"></div>
-
     <div class="quiz-foot">
       <button class="btn-primary" id="nextBtn" disabled>下一题</button>
     </div>
   </section>
 
-  <!-- ============ 盲盒 ============ -->
   <section class="blind" id="blind" style="display:none">
     <div class="blind-stage" id="blindStage"></div>
   </section>
 
-  <!-- ============ 结果页 ============ -->
   <section class="result" id="result" style="display:none">
     <div id="resultMain"></div>
   </section>
-
 </div>
 
-<!-- 人格图鉴弹层 -->
 <div class="modal" id="collectionModal">
   <div class="modal-bg" data-close></div>
   <div class="modal-panel">
@@ -98,7 +79,6 @@
   </div>
 </div>
 
-<!-- 分享卡弹层 -->
 <div class="modal" id="shareModal">
   <div class="modal-bg" data-close></div>
   <div class="modal-panel modal-panel-card">
@@ -117,11 +97,20 @@
 
 <div class="toast" id="toast"></div>
 
-<!-- 脚本 -->
-<script src="js/data.js"></script>
-<script src="js/scoring.js"></script>
-<script src="js/app.js"></script>
-<script src="js/result.js"></script>
+<script src="js/data.js?v=3"></script>
+<script src="js/scoring.js?v=3"></script>
+<script src="js/app.js?v=3"></script>
+<script src="js/result.js?v=3"></script>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module" src="js/three-character.js?v=3"></script>
 <script>window.__BOOT__ && window.__BOOT__();</script>
 
 </body>

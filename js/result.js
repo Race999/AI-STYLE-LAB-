@@ -1,12 +1,19 @@
 /* ============================================================
    js/result.js
-   结果页渲染 / 分享卡（Canvas 生成图片） / 图鉴 / 扭蛋 / 穿搭 CP
+   结果页渲染 / 分享卡（Canvas 生成图片 + 微信长按保存）
    ============================================================ */
 
 (function(){
   'use strict';
 
-  const $ = (sel) => document.querySelector(sel);
+  /* ---------- 环境检测 ---------- */
+  function isWeChat(){
+    return /MicroMessenger/i.test(navigator.userAgent || "");
+  }
+  function isIOS(){
+    const ua = navigator.userAgent || "";
+    return /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+  }
 
   function esc(s){
     return String(s).replace(/[&<>"']/g, m=>({
@@ -116,7 +123,6 @@
       </div>
 
       <div class="r-section">
-
         <div class="r-card">
           <div class="r-card-title">属性面板 <span class="cn">人格属性</span></div>
           <div class="attr-list">${attrHtml}</div>
@@ -239,7 +245,6 @@
             </div>
           </div>
         </div>
-
       </div>
 
       <div class="r-section">
@@ -353,7 +358,7 @@
   }
 
   /* ============================================================
-     Canvas 工具函数
+     Canvas 工具
      ============================================================ */
   function roundRectPath(ctx, x, y, w, h, r){
     ctx.beginPath();
@@ -389,8 +394,20 @@
     return lines.length;
   }
 
+  function dataURLtoBlob(dataUrl){
+    try{
+      const arr = dataUrl.split(",");
+      const mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]);
+      let n = bstr.length;
+      const u8 = new Uint8Array(n);
+      while(n--){ u8[n] = bstr.charCodeAt(n); }
+      return new Blob([u8], { type: mime });
+    }catch(e){ return null; }
+  }
+
   /* ============================================================
-     用 Canvas 生成分享图片
+     用 Canvas 生成分享图片（带 toBlob 兜底）
      ============================================================ */
   function generateShareImage(r){
     return new Promise((resolve, reject)=>{
@@ -404,11 +421,9 @@
         const ctx = canvas.getContext("2d");
         ctx.scale(dpr, dpr);
 
-        /* ---- 外背景 ---- */
         ctx.fillStyle = "#F8F6F2";
         ctx.fillRect(0, 0, W, H);
 
-        /* ---- 内白卡片 ---- */
         const PAD = 30;
         roundRectPath(ctx, PAD, PAD, W - PAD * 2, H - PAD * 2, 26);
         ctx.fillStyle = "#FFFFFF";
@@ -417,7 +432,6 @@
         ctx.lineWidth = 1;
         ctx.stroke();
 
-        /* ---- 顶部装饰线 ---- */
         ctx.strokeStyle = "#B89562";
         ctx.lineWidth = 1;
         ctx.beginPath();
@@ -430,37 +444,31 @@
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
 
-        /* ---- 品牌行 ---- */
         ctx.fillStyle = "#B89562";
         ctx.font = "600 13px -apple-system,'PingFang SC','Microsoft YaHei',sans-serif";
         ctx.fillText("A I   S T Y L E   L A B", W / 2, 92);
         ctx.font = "400 10px -apple-system,'PingFang SC','Microsoft YaHei',sans-serif";
         ctx.fillText("·   S T Y L E   D N A   ·", W / 2, 118);
 
-        /* ---- 主人格 emoji ---- */
         ctx.font = "96px 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif";
         ctx.fillStyle = "#1A1714";
         ctx.fillText(r.main.emoji, W / 2, 232);
 
-        /* ---- 主人格名字 ---- */
         ctx.font = "500 54px 'Songti SC','STSong',Georgia,serif";
         ctx.fillStyle = "#1A1714";
         ctx.fillText(r.main.name, W / 2, 342);
 
-        /* ---- MBTI 行 ---- */
         const mbtiInfo = window.MBTI_TYPES_INFO[r.mbti] || { name:"风格观察者" };
         ctx.font = "400 16px -apple-system,'PingFang SC','Microsoft YaHei',sans-serif";
         ctx.fillStyle = "#77716D";
         ctx.fillText(`${r.mbti}  ·  ${mbtiInfo.name}`, W / 2, 400);
 
-        /* ---- 分割线 ---- */
         ctx.strokeStyle = "#ECE7E0";
         ctx.beginPath();
         ctx.moveTo(120, 458);
         ctx.lineTo(W - 120, 458);
         ctx.stroke();
 
-        /* ---- 三项属性 ---- */
         const attrs = [
           { l:"温柔度", v: r.attrs.温柔度 },
           { l:"氛围感", v: r.attrs.氛围感 },
@@ -477,19 +485,16 @@
           ctx.fillText(a.l, cx, 574);
         });
 
-        /* ---- 分割线 ---- */
         ctx.strokeStyle = "#ECE7E0";
         ctx.beginPath();
         ctx.moveTo(120, 632);
         ctx.lineTo(W - 120, 632);
         ctx.stroke();
 
-        /* ---- HIDDEN PERSONA ---- */
         ctx.font = "600 12px -apple-system,'PingFang SC','Microsoft YaHei',sans-serif";
         ctx.fillStyle = "#A8A29E";
         ctx.fillText("H I D D E N   P E R S O N A", W / 2, 682);
 
-        /* ---- 隐藏人格 emoji + 名字 ---- */
         ctx.font = "400 30px 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif";
         ctx.fillText(r.hidden.emoji, W / 2 - 78, 740);
         ctx.font = "500 28px 'Songti SC','STSong',Georgia,serif";
@@ -498,30 +503,112 @@
         ctx.fillText(r.hidden.name, W / 2 - 40, 742);
         ctx.textAlign = "center";
 
-        /* ---- 引言 ---- */
         ctx.font = "italic 400 16px 'Songti SC','STSong',Georgia,serif";
         ctx.fillStyle = "#77716D";
         const quote = `“${r.main.tagline}”`;
         wrapTextCanvas(ctx, quote, W / 2, 830, W - 240, 34);
 
-        /* ---- 标签 ---- */
         ctx.font = "400 13px -apple-system,'PingFang SC','Microsoft YaHei',sans-serif";
         ctx.fillStyle = "#A8A29E";
         ctx.fillText(`#穿搭人格  #${r.main.name}  #我的穿搭风格`, W / 2, 970);
 
-        /* ---- 底部品牌 ---- */
         ctx.font = "600 11px -apple-system,'PingFang SC','Microsoft YaHei',sans-serif";
         ctx.fillStyle = "#B89562";
         ctx.fillText("A I   S T Y L E   L A B", W / 2, H - 70);
 
-        canvas.toBlob(blob=>{
-          if(blob) resolve(blob);
-          else reject(new Error("canvas.toBlob failed"));
-        }, "image/png", 0.95);
+        /* ---- 优先 toBlob，失败走 toDataURL ---- */
+        const finish = ()=>{
+          try{
+            if(typeof canvas.toBlob === "function"){
+              canvas.toBlob(b=>{
+                if(b) resolve(b);
+                else fallback();
+              }, "image/png", 0.95);
+            } else {
+              fallback();
+            }
+          }catch(e){
+            fallback();
+          }
+        };
+
+        const fallback = ()=>{
+          try{
+            const dataUrl = canvas.toDataURL("image/png");
+            const blob = dataURLtoBlob(dataUrl);
+            if(blob) resolve(blob);
+            else reject(new Error("canvas export failed"));
+          }catch(e){
+            reject(e);
+          }
+        };
+
+        finish();
       }catch(e){
         reject(e);
       }
     });
+  }
+
+  /* ============================================================
+     全屏看图（微信 / iOS 长按保存用）
+     ============================================================ */
+  function showFullImage(url, opts){
+    opts = opts || {};
+    const exist = document.querySelector(".img-viewer");
+    if(exist) exist.remove();
+
+    const div = document.createElement("div");
+    div.className = "img-viewer";
+    div.innerHTML = `
+      <button class="img-viewer-close">&times;</button>
+      <img src="${url}" alt="分享卡">
+      <div class="img-viewer-tip">${opts.tip || "长按图片保存到相册"}</div>
+      <div class="img-viewer-sub">${opts.sub || "若无反应，可截图保存"}</div>
+    `;
+    document.body.appendChild(div);
+
+    div.querySelector(".img-viewer-close").onclick = ()=> div.remove();
+    div.addEventListener("click", (e)=>{
+      if(e.target === div) div.remove();
+    });
+  }
+
+  /* ============================================================
+     保存图片（微信/iOS → 全屏长按；安卓/桌面 → 下载）
+     ============================================================ */
+  function saveImageToDevice(url, file){
+    /* 微信里无论什么平台，都走全屏长按 */
+    if(isWeChat()){
+      showFullImage(url, {
+        tip: "长按图片保存到相册",
+        sub: "或点击右上角 ··· 发送给朋友"
+      });
+      return;
+    }
+
+    /* iOS Safari 也不支持 a.download 下载图片，走全屏长按 */
+    if(isIOS()){
+      showFullImage(url, {
+        tip: "长按图片保存到相册",
+        sub: "若无反应，可截图保存"
+      });
+      return;
+    }
+
+    /* 安卓 / 桌面：直接下载 */
+    try{
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = (file && file.name) || "style-card.png";
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.App.toast("图片已保存到下载目录");
+    }catch(e){
+      showFullImage(url, { tip: "长按图片保存到相册" });
+    }
   }
 
   /* ============================================================
@@ -533,14 +620,14 @@
     const saveBtn   = document.getElementById("shareSaveBtn");
     const nativeBtn = document.getElementById("shareNativeBtn");
 
+    if(!modal || !wrap) return;
+
     modal.classList.add("open");
 
-    /* 关闭事件 */
     modal.querySelectorAll("[data-close]").forEach(el=>{
       el.onclick = ()=> modal.classList.remove("open");
     });
 
-    /* loading */
     wrap.className = "share-preview";
     wrap.innerHTML = `<div class="share-loading"><div class="spinner"></div>正在生成图片…</div>`;
 
@@ -564,97 +651,69 @@
       return;
     }
 
-    /* ---- 保存图片按钮 ---- */
-    saveBtn.onclick = ()=> saveImageToDevice(imageUrl, imageFile);
+    /* ---- 保存按钮 ---- */
+    if(saveBtn){
+      saveBtn.onclick = ()=> saveImageToDevice(imageUrl, imageFile);
+    }
 
     /* ---- 分享按钮 ---- */
-    const canShareFile = navigator.canShare && navigator.canShare({ files: [imageFile] });
+    const wx = isWeChat();
+    const canShareFile = !!(navigator.canShare && navigator.canShare({ files: [imageFile] }));
 
-    if(canShareFile){
-      nativeBtn.style.display = "block";
-      nativeBtn.textContent = "分享给朋友";
-      nativeBtn.onclick = async ()=>{
-        try{
-          await navigator.share({
-            files: [imageFile],
-            title: "我的穿搭人格",
-            text: `我的穿搭人格是 ${r.main.emoji} ${r.main.name}`
+    if(nativeBtn){
+      if(wx){
+        /* 微信里：引导长按保存 */
+        nativeBtn.style.display = "block";
+        nativeBtn.textContent = "分享给朋友";
+        nativeBtn.onclick = ()=>{
+          showFullImage(imageUrl, {
+            tip: "长按图片保存到相册",
+            sub: "保存后点击右上角 ··· 发送给朋友"
           });
-        }catch(e){
-          if(e && e.name !== "AbortError"){
-            saveImageToDevice(imageUrl, imageFile);
+        };
+      } else if(canShareFile){
+        /* 原生支持文件分享：走系统分享面板 */
+        nativeBtn.style.display = "block";
+        nativeBtn.textContent = "分享给朋友";
+        nativeBtn.onclick = async ()=>{
+          try{
+            await navigator.share({
+              files: [imageFile],
+              title: "我的穿搭人格",
+              text: `我的穿搭人格是 ${r.main.emoji} ${r.main.name}`
+            });
+          }catch(e){
+            if(e && e.name !== "AbortError"){
+              showFullImage(imageUrl, { tip: "长按图片保存到相册" });
+            }
           }
-        }
-      };
-    } else if(navigator.share){
-      nativeBtn.style.display = "block";
-      nativeBtn.textContent = "分享结果";
-      nativeBtn.onclick = async ()=>{
-        try{
-          await navigator.share({
-            title: "我的穿搭人格",
-            text: buildShareText(r)
-          });
-        }catch(e){}
-      };
-    } else {
-      nativeBtn.style.display = "block";
-      nativeBtn.textContent = "复制结果文字";
-      nativeBtn.onclick = async ()=>{
-        try{
-          await navigator.clipboard.writeText(buildShareText(r));
-          window.App.toast("已复制结果文字");
-        }catch(e){
-          window.App.toast("复制失败，请长按图片保存");
-        }
-      };
-    }
-  }
-
-  /* ============================================================
-     保存图片到设备
-     ============================================================ */
-  function saveImageToDevice(url, file){
-    const ua = navigator.userAgent || "";
-    const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
-    const isAndroid = /Android/i.test(ua);
-
-    /* ---- iOS：新开窗口展示图片，引导长按保存 ---- */
-    if(isIOS){
-      const w = window.open("", "_blank");
-      if(w){
-        w.document.write(`<!DOCTYPE html><html lang="zh-CN"><head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-          <title>长按图片保存</title>
-          <style>
-            *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-            body{background:#0d0d0d;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-family:-apple-system,sans-serif;padding:24px}
-            img{max-width:100%;max-height:78vh;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.6);-webkit-touch-callout:default}
-            p{margin-top:22px;font-size:15px;line-height:1.7;text-align:center;opacity:.9}
-            .tip{font-size:12px;color:#8a8a8a;margin-top:8px}
-          </style></head><body>
-          <img src="${url}" alt="分享卡">
-          <p>长按图片 → 存储到照片</p>
-          <p class="tip">若无反应，可截图保存</p>
-        </body></html>`);
-        w.document.close();
+        };
+      } else if(navigator.share){
+        /* 支持文字分享 */
+        nativeBtn.style.display = "block";
+        nativeBtn.textContent = "分享结果";
+        nativeBtn.onclick = async ()=>{
+          try{
+            await navigator.share({
+              title: "我的穿搭人格",
+              text: buildShareText(r)
+            });
+          }catch(e){}
+        };
       } else {
-        window.App.toast("请允许弹窗后重试");
+        /* 兜底：复制文字 */
+        nativeBtn.style.display = "block";
+        nativeBtn.textContent = "复制结果文字";
+        nativeBtn.onclick = async ()=>{
+          try{
+            await navigator.clipboard.writeText(buildShareText(r));
+            window.App.toast("已复制结果文字");
+          }catch(e){
+            window.App.toast("复制失败，请长按图片保存");
+          }
+        };
       }
-      return;
     }
-
-    /* ---- Android / 桌面：直接下载 ---- */
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = file.name;
-    a.rel = "noopener";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-
-    window.App.toast("图片已保存到相册或下载目录");
   }
 
   /* ============================================================
